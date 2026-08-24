@@ -21,16 +21,15 @@
   }
   .cover-title{ font-size:clamp(28px,6vw,48px); margin:0 0 10px; color:#2E2A4A; }
 
-  /* ★注意事項の文字サイズと幅を大きく調整★ */
   .cover-notes {
-    font-size: 15px; /* 13px -> 15px に大きく */
+    font-size: 15px;
     color: #d90429;
     background: #fff0f0;
     border: 1px solid #ffccd5;
     border-radius: 8px;
     padding: 14px 18px;
     margin: 0 0 16px;
-    max-width: 600px; /* 420px -> 600px に広げて読みやすく */
+    max-width: 600px;
     line-height: 1.7;
     text-align: left;
     white-space: pre-wrap;
@@ -52,6 +51,9 @@
   .ending-message{
     font-size:15px; opacity:0.8; max-width:440px; margin:0 auto;
     line-height:1.8; white-space:pre-wrap;
+  }
+  .ending-credit{
+    font-size:13px; opacity:0.55; margin-top:16px;
   }
 
   .confetti-piece{
@@ -249,6 +251,7 @@
     <div class="ending-mascot">🎉</div>
     <h1 id="ending-title" class="ending-title"></h1>
     <p class="ending-message" id="ending-message"></p>
+    <p class="ending-credit" id="ending-credit"></p>
   </section>
 
   <div class="image-zoom-overlay" id="image-zoom-overlay" onclick="closeZoomImage()">
@@ -260,6 +263,7 @@
 
   const COVER_NOTES     = "【注意事項】\n・この謎解きは2026年8月29日に行われる『GEN村フェス2次会』の開催を記念して1リスナーが制作した非公式のものです。何か問題があった際には非公開とさせていただくことがあります。\n・12問の謎を解き、その後に出題されるLASTの問題に正解するとクリアとなります。\n答えはすべてひらがなで入力してください。\n・この謎を解くにあたり、GEN村やGEN村メンバーに関するものの知識は必要ありません。\n・制限時間はありません。ご自身のペースでお楽しみください。\n・URLの改変やソースコードの閲覧はこの謎解きを楽しめなかったり、ネタバレにつながりますのでおやめください。\n・行き詰った際にはヒントをご活用ください。また、わからないことがある際は検索もご活用ください。\n・途中でページを再読み込み（リロード）すると、最初からの挑戦になります。\n・ネタバレ防止のため、答えをSNS等に書き込むことはご遠慮ください。\n・その他、ご質問やご意見等がある際はお手数をおかけしますが、制作者であるTHNのXアカウント@THN988958564674のDMにご連絡をお願いいたします。";
   const COVER_MESSAGE   = "準備ができたら下のボタンから謎解きを開始してください！";
+  const COVER_CREDIT    = "制作者：THN（X: @THN988958564674）";
   const ENDING_TITLE    = "CLEAR!";
   const ENDING_MESSAGE  = "クリアおめでとうございます！";
 
@@ -533,6 +537,7 @@
 
     document.getElementById('ending-title').textContent = ENDING_TITLE;
     document.getElementById('ending-message').textContent = ENDING_MESSAGE;
+    document.getElementById('ending-credit').textContent = COVER_CREDIT;
 
     launchConfetti();
   }
