@@ -21,16 +21,17 @@
   }
   .cover-title{ font-size:clamp(28px,6vw,48px); margin:0 0 10px; color:#2E2A4A; }
 
+  /* ★注意事項の文字サイズと幅を大きく調整★ */
   .cover-notes {
-    font-size: 13px;
+    font-size: 15px; /* 13px -> 15px に大きく */
     color: #d90429;
     background: #fff0f0;
     border: 1px solid #ffccd5;
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 14px 18px;
     margin: 0 0 16px;
-    max-width: 420px;
-    line-height: 1.6;
+    max-width: 600px; /* 420px -> 600px に広げて読みやすく */
+    line-height: 1.7;
     text-align: left;
     white-space: pre-wrap;
   }
@@ -178,7 +179,6 @@
   .q-modal-text{ font-size:15px; line-height:1.8; white-space:pre-wrap; margin-bottom:12px; }
   .q-modal-answer{ font-size:14px; font-weight:bold; color:#1F9D55; }
 
-  /* ★画像拡大用のオーバーレイ★ */
   .image-zoom-overlay {
     display: none;
     position: fixed;
@@ -251,7 +251,6 @@
     <p class="ending-message" id="ending-message"></p>
   </section>
 
-  <!-- 画像拡大モーダル -->
   <div class="image-zoom-overlay" id="image-zoom-overlay" onclick="closeZoomImage()">
     <img id="image-zoom-img" src="" alt="拡大画像">
   </div>
@@ -464,7 +463,6 @@
     document.getElementById('q-modal-overlay').classList.remove('open');
   }
 
-  /* ★画像拡大モーダルの制御関数★ */
   function openZoomImage(src){
     if(!src) return;
     document.getElementById('image-zoom-img').src = src;
