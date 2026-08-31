@@ -3,41 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Go 2</title>
+<title>謎解きチャレンジ</title>
 <style>
-  /* ステップ8以降で、ここにデザイン(色・フォントなど)を追加していきます */
   *{ box-sizing:border-box; }
   body{ font-family: sans-serif; margin:0; padding:0; }
 
-  /* 画面切り替えの土台:screenクラスを持つ要素は、activeクラスが付いた時だけ表示する */
   .screen{ display:none; min-height:100vh; padding:24px; }
   .screen.active{ display:block; }
 
-  /* 今は見た目確認用の仮スタイル。後のステップで正式なデザインに置き換えます */
   #screen-cover{ background:#FFF6E9; }
   #screen-game{ background:#F4FBFF; }
   #screen-ending{ background:#F6F0FF; }
 
-  /* ---- ステップ2:表紙 ---- */
-  /* 注意:「#screen-cover.active」のように active と組み合わせることで、
-     非表示のとき(activeが外れたとき)はちゃんと隠れるようにしています */
   #screen-cover.active{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; min-height:100vh;
   }
   .cover-title{ font-size:clamp(28px,6vw,48px); margin:0 0 10px; color:#2E2A4A; }
 
-  /* 表紙の注意事項のスタイル */
   .cover-notes {
-    font-size: 13px;
+    font-size: 15px;
     color: #d90429;
     background: #fff0f0;
     border: 1px solid #ffccd5;
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 14px 18px;
     margin: 0 0 16px;
-    max-width: 420px;
-    line-height: 1.6;
+    max-width: 600px;
+    line-height: 1.7;
     text-align: left;
     white-space: pre-wrap;
   }
@@ -49,7 +42,6 @@
     border:none; border-radius:100px; padding:16px 48px; cursor:pointer;
   }
 
-  /* ---- ステップ8:エンディング ---- */
   #screen-ending.active{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; min-height:100vh; padding:24px; position:relative;
@@ -57,17 +49,13 @@
   .ending-mascot{ font-size:72px; margin-bottom:6px; }
   .ending-title{ font-size:clamp(32px,7vw,56px); margin:0 0 10px; color:#9B6BFF; }
   .ending-message{
-    font-size:15px; opacity:0.8; max-width:440px; margin:0 auto 30px;
+    font-size:15px; opacity:0.8; max-width:440px; margin:0 auto;
     line-height:1.8; white-space:pre-wrap;
   }
-  .share-btn{
-    display:inline-flex; align-items:center; gap:10px;
-    font-weight:bold; font-size:15px; color:#fff; background:#111;
-    border-radius:100px; padding:14px 30px; text-decoration:none;
-    box-shadow:6px 6px 0 rgba(46,42,74,0.15);
+  .ending-credit{
+    font-size:13px; opacity:0.55; margin-top:16px;
   }
 
-  /* ---- ステップ8:紙吹雪 ---- */
   .confetti-piece{
     position:fixed; top:-20px; width:10px; height:14px; z-index:50; pointer-events:none;
     animation-name: confettiFall; animation-timing-function: linear; animation-fill-mode: forwards;
@@ -76,13 +64,11 @@
     to{ transform: translateY(105vh) rotate(540deg); opacity:0.9; }
   }
 
-  /* ---- ステップ3:出題画面 ---- */
   #screen-game.active{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:18px; min-height:100vh; padding:60px 16px 24px; position:relative;
   }
 
-  /* ★追加：画面左上の「表紙に戻る」ボタン★ */
   .back-to-cover-btn {
     position: absolute;
     top: 16px;
@@ -104,9 +90,8 @@
   .question-card{
     width:100%; max-width:600px; background:#fff; border-radius:20px;
     padding:30px 26px; box-shadow:6px 6px 0 rgba(46,42,74,0.12);
-    transition: opacity 1.1s ease, transform 1.1s ease; /* ステップ5:LASTへ切り替わる時のフェードで使用 */
+    transition: opacity 1.1s ease, transform 1.1s ease;
   }
-  /* ステップ5:このクラスが付くと、じわっと消えていく(LASTへの遷移専用) */
   .question-card.fading-slow{ opacity:0; transform:scale(0.92); }
   .q-number{
     display:inline-block; font-weight:bold; font-size:13px;
@@ -126,7 +111,6 @@
   .feedback.ok{ color:#1F9D55; }
   .feedback.ng{ color:#FF6B6B; }
 
-  /* ---- ステップ7:ヒント ---- */
   .hint-area{ border-top:2px dashed #EDE7FB; padding-top:14px; margin-top:6px; }
   .hint-btn{
     font-size:13px; font-weight:bold; color:#9B6BFF; background:#F1EBFF;
@@ -139,30 +123,22 @@
     border-radius:8px; font-size:13px; line-height:1.6;
   }
 
-  /* ---- 謎の画像 ---- */
-  /* stageはquestion-cardの土台 */
   .stage{ position:relative; width:100%; max-width:600px; }
-
-  /* カードの中(問題番号のすぐ下、問題文の上)に表示する「窓」。
-     幅は「画面幅の80%」か「420px」の小さい方に自動で合わせる。
-     中の画像がこの窓の外へスライドしていくので、overflow:hidden で窓の外を隠している */
   .mascot{
     width:min(80vw, 420px); max-width:100%; height:220px;
     margin:0 auto 20px; position:relative; overflow:hidden;
   }
-  /* 窓の中に入る「1枚の画像(または絵文字)」。正解時は、これが2枚同時に横(または縦)に並んで
-     一緒にスライドすることで、1枚目にくっついて2枚目が現れるように見える */
   .mascot-slide{
     position:absolute; top:0; left:0; width:100%; height:100%;
     display:flex; align-items:center; justify-content:center;
-    font-size:80px; /* 画像がない問題(絵文字表示)の場合のサイズ */
-    pointer-events:none; user-select:none;
+    font-size:80px;
+    user-select:none;
   }
   .mascot-slide img{
     max-width:100%; max-height:100%; object-fit:contain; display:block;
+    cursor: zoom-in;
   }
 
-  /* ---- ステップ6:画面上部の問題番号ナビ ---- */
   .q-nav{
     display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
     max-width:600px;
@@ -171,20 +147,16 @@
     width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
     font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;
   }
-  /* まだ解いていない問題:灰色でクリック不可 */
   .q-nav-btn.nav-locked{
     background:#E3E3E3; color:#9A9A9A; cursor:default;
   }
-  /* すでに解いた問題:クリックして見返せる */
   .q-nav-btn.nav-solved{
     background:#4ADE80; color:#fff;
   }
-  /* 今まさに解いている問題 */
   .q-nav-btn.nav-current{
     background:#FF6B6B; color:#fff; box-shadow:0 0 0 3px rgba(255,107,107,0.3);
   }
 
-  /* ---- ステップ6:問題を見返すためのモーダル ---- */
   .q-modal-overlay{
     display:none; position:fixed; inset:0; background:rgba(46,42,74,0.45);
     align-items:center; justify-content:center; z-index:100; padding:20px;
@@ -204,16 +176,36 @@
   }
   .q-modal-image{
     display:block; width:100%; max-height:260px; object-fit:contain; margin-bottom:14px;
+    cursor: zoom-in;
   }
   .q-modal-text{ font-size:15px; line-height:1.8; white-space:pre-wrap; margin-bottom:12px; }
   .q-modal-answer{ font-size:14px; font-weight:bold; color:#1F9D55; }
+
+  .image-zoom-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    cursor: zoom-out;
+  }
+  .image-zoom-overlay.open {
+    display: flex;
+  }
+  .image-zoom-overlay img {
+    max-width: 95vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
 </style>
 </head>
 <body>
 
-  <!-- ================================================
-       画面①:表紙
-  ================================================= -->
   <section id="screen-cover" class="screen active">
     <h1 id="cover-title" class="cover-title"></h1>
     <p id="cover-notes" class="cover-notes"></p>
@@ -222,11 +214,7 @@
     <button class="start-btn" id="start-btn" onclick="startGame()">スタート</button>
   </section>
 
-  <!-- ================================================
-       画面②:出題画面
-  ================================================= -->
   <section id="screen-game" class="screen">
-    <!-- ★追加：表紙へ戻るボタン★ -->
     <button class="back-to-cover-btn" onclick="goToCover()">🏠 表紙へ</button>
 
     <div class="q-nav" id="q-nav"></div>
@@ -249,71 +237,55 @@
     </div>
   </section>
 
-  <!-- モーダル -->
   <div class="q-modal-overlay" id="q-modal-overlay">
     <div class="q-modal">
       <button class="q-modal-close" onclick="closeQuestionView()">×</button>
       <span class="q-modal-number" id="q-modal-number"></span>
-      <img class="q-modal-image" id="q-modal-image" alt="謎の画像">
+      <img class="q-modal-image" id="q-modal-image" alt="謎の画像" onclick="openZoomImage(this.src)">
       <p class="q-modal-text" id="q-modal-text"></p>
       <p class="q-modal-answer" id="q-modal-answer"></p>
     </div>
   </div>
 
-  <!-- ================================================
-       画面③:エンディング
-  ================================================= -->
   <section id="screen-ending" class="screen">
     <div class="ending-mascot">🎉</div>
     <h1 id="ending-title" class="ending-title"></h1>
     <p class="ending-message" id="ending-message"></p>
-    <a class="share-btn" id="share-link" href="#" target="_blank" rel="noopener">
-      <span>𝕏</span><span>クリアをシェアする</span>
-    </a>
+    <p class="ending-credit" id="ending-credit"></p>
   </section>
 
+  <div class="image-zoom-overlay" id="image-zoom-overlay" onclick="closeZoomImage()">
+    <img id="image-zoom-img" src="" alt="拡大画像">
+  </div>
 
 <script>
-/* ============================================================
-   ▼▼▼ タイトル設定 ▼▼▼
-   ============================================================ */
   const EVENT_TITLE = "Go 2";
 
-
-/* ============================================================
-   ▼▼▼ 表紙・エンディングの文章設定 ▼▼▼
-   ============================================================ */
-  const COVER_NOTES     = "【注意事項】\n・この謎解きは2026年8月29日に行われる『GEN村フェス2次会』の開催を記念して1リスナーが制作した非公式のものです。何か問題があった際には非公開とさせていただくことがあります。\n・12問の謎を解き、その後に出題されるLASTの問題に正解するとクリアとなります。\n答えはすべてひらがなで入力してください。\n制限時間はありません。ご自身のペースでお楽しみください。\n・URLの改変やソースコードの閲覧はこの謎解きを楽しめなかったり、ネタバレにつながりますのでおやめください。\n・行き詰った際にはヒントをご活用ください。また、わからないことがある際は検索もご活用ください。\n・途中でページを再読み込み（リロード）すると、最初からの挑戦になります。\n・ネタバレ防止のため、答えをSNS等に書き込むことはご遠慮ください。\n・その他、ご質問やご意見等がある際はお手数をおかけしますが、制作者であるTHNのXアカウント@THN988958564674のDMにご連絡をお願いいたします。";
+  const COVER_NOTES     = "【注意事項】\n・この謎解きは2026年8月29日に行われる『GEN村フェス2次会』の開催を記念して1リスナーが制作した非公式のものです。何か問題があった際には非公開とさせていただくことがあります。\n・12問の謎を解き、その後に出題されるLASTの問題に正解するとクリアとなります。\n答えはすべてひらがなで入力してください。\n・この謎を解くにあたり、GEN村やGEN村メンバーに関するものの知識は必要ありません。\n・制限時間はありません。ご自身のペースでお楽しみください。\n・URLの改変やソースコードの閲覧はこの謎解きを楽しめなかったり、ネタバレにつながりますのでおやめください。\n・行き詰った際にはヒントをご活用ください。また、わからないことがある際は検索もご活用ください。\n・途中でページを再読み込み（リロード）すると、最初からの挑戦になります。\n・ネタバレ防止のため、答えをSNS等に書き込むことはご遠慮ください。\n・その他、ご質問やご意見等がある際はお手数をおかけしますが、制作者であるTHNのXアカウント@THN988958564674のDMにご連絡をお願いいたします。";
   const COVER_MESSAGE   = "準備ができたら下のボタンから謎解きを開始してください！";
+  const COVER_CREDIT    = "制作者：THN（X: @THN988958564674）";
   const ENDING_TITLE    = "CLEAR!";
-  const ENDING_MESSAGE  = "(エンディングに表示するメッセージを入力してください)";
-  const TWEET_TEXT      = "(Xでシェアされる時の文章を入力してください)";
+  const ENDING_MESSAGE  = "クリアおめでとうございます！";
 
-
-/* ============================================================
-   ▼▼▼ 問題データ ▼▼▼
-   ============================================================ */
   const QUESTIONS = [
-    { text: "問題1",  image: "GF2 1(GEN).png",  answerHash: "c496396933379fb82e72cbf3548a16b975dc16d428f8729bc2e5d607d370dd1f",  hints: ["(問題1 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題2",  image: "GF2 2(HYBRIDSENSE).png",  answerHash: "57df5397244b1a1363c23ff358c556a70262fe22e17c7dffe60d2c361ecbaa2d",  hints: ["(問題2 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題3",  image: "GF2 3(Is).png",  answerHash: "db7ea3aa6c8a7e2bab12a0e5d4198a32909a48cc1d78ad568bb1ce164d6bef36",  hints: ["(問題3 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題4",  image: "GF2 4(Rin).png",  answerHash: "f3f4f709229ece11b422c5201a9e1be3a13089b2001a2c47194047b8a6bc0bdc",  hints: ["(問題4 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題5",  image: "GF2 5(しんたろー).png",  answerHash: "8cffb60ed7223f49ee5c9caa44de6744126b570904b5914f8a1a16e45645c8bd",  hints: ["(問題5 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題6",  image: "GF2 6(たくや).png",  answerHash: "73ebd92ecb7f1b915d1d1ea0782e30af9ecf74d8cabaec8a0dc45aa7bea1b65f",  hints: ["(問題6 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題7",  image: "GF2 7(はたさこ).png",  answerHash: "53d4037cd58d7c7471e597da6abfec5153ca7563a536ad18c0f202ba1df293d9",  hints: ["(問題7 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題8",  image: "GF2 8(もるてん).png",  answerHash: "a7c7402954360fc6f2fe86d7527e47d280afed5c0ce1c9c7fb9f9965943d4da8",  hints: ["(問題8 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題9",  image: "GF2 9(スナパイ).png",  answerHash: "c48eb6a0bf20baf726a5cc11fb63838b6f15842f4389c20e91b75b5b97ceb408",  hints: ["(問題9 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題10",  image: "GF2 10(秋風。).png",  answerHash: "c9997849191670eef9edc63e745b2311b732ccd8ee4fc422212c7024910bca9f", hints: ["(問題10 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題11",  image: "GF2 11(中野あるま).png",  answerHash: "e99459703b997e987c8643e533ee802c3fd54bd24ad3e40bd991322176b7e3c6", hints: ["(問題11 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "問題12",  image: "GF2 12(林檎さん).png",  answerHash: "2dde303424aec9ff19a58ed78d09c52a7c629a3398049cbef271ce00aaa9e76c", hints: ["(問題12 ヒント1)"], moveDirection: "right", mascotEmoji: "🔮" },
-    { text: "LAST", image: "GF2 LAST.png", answerHash: "efdbc1b8b7ae3cb178627cca94393a426cde8ddffd115b39c30697d4a109c6f1", hints: ["(LAST ヒント1)"], moveDirection: "down", mascotEmoji: "🔮" }
+    { text: "ひらがなで解答",  image: "GF2 1(GEN).png",  answerHash: "c496396933379fb82e72cbf3548a16b975dc16d428f8729bc2e5d607d370dd1f",  hints: ["矢印の上に書かれている言葉に注目してみましょう。ひらがなで書いてみたり、声に出してみると何かわかるかもしれません。","左の矢印の上に書かれているのは『「め」が「み」』『「が」は「く」』です。「タガメ」がこの二つの言葉による操作のために「たくみ」になっています。"], moveDirection: "left", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 2(HYBRIDSENSE).png",  answerHash: "57df5397244b1a1363c23ff358c556a70262fe22e17c7dffe60d2c361ecbaa2d",  hints: ["それぞれの楽器の名前とその個数に注目してみましょう。","楽器は上から「ピアノ」「バイオリン」「ギター」です。それぞれのイラストに左から1文字ずつ文字を当てはめて矢印が通った部分の文字を順に拾いましょう。"], moveDirection: "left", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 3(Is).png",  answerHash: "db7ea3aa6c8a7e2bab12a0e5d4198a32909a48cc1d78ad568bb1ce164d6bef36",  hints: ["それぞれのイラストは都道府県の形を表しています。それぞれがどの都道府県なのか考えてみましょう。わからない都道府県は調べてみましょう。","上段の3つの都道府県は左から「えひめ」「いわて」「とちぎ」、下段の4つの都道府県は左から「ひょうご」「ふくしま」「おおさか」「やまなし」の形です。矢印の色の違いに注目して答えを考えてみましょう。"], moveDirection: "left", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 4(Rin).png",  answerHash: "f3f4f709229ece11b422c5201a9e1be3a13089b2001a2c47194047b8a6bc0bdc",  hints: ["矢印の左に書かれている言葉に注目しましょう。それぞれの言葉を漢字にしてみましょう。","「らいじん」を漢字にすると「雷神」となります。漢字それぞれを2つに分解し、それを線でつないでみましょう。"], moveDirection: "up", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 5(しんたろー).png",  answerHash: "8cffb60ed7223f49ee5c9caa44de6744126b570904b5914f8a1a16e45645c8bd",  hints: ["4人の発言それぞれについて1つずつ考えていきましょう。誰か一人の発言を本当、または嘘と仮定して、他の人の発言との整合性を考えましょう。","ズバリ、本当のことを言っているのは「コニシ」と「キタムラ」で、嘘のことを言っているのは「ヒガシ」と「ミナミノ」です。その時に、誰がどの役職なのか考えてみましょう。"], moveDirection: "up", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 6(たくや).png",  answerHash: "73ebd92ecb7f1b915d1d1ea0782e30af9ecf74d8cabaec8a0dc45aa7bea1b65f",  hints: ["同じ色の漢字の組み合わせをそれぞれたどってみましょう。例えば赤色の「葉」から「胃」までたどるときは赤色、オレンジ色、紫色の線は通ることができます。","ズバリ、通った文字が「こども」となるのは青色の漢字をたどったときです。答えはそれぞれの漢字を訓読みし、それぞれ当てはめるべきところに当てはめたものです。"], moveDirection: "right", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 7(はたさこ).png",  answerHash: "53d4037cd58d7c7471e597da6abfec5153ca7563a536ad18c0f202ba1df293d9",  hints: ["マスに1文字ずつひらがなを当てはめて、矢印に従って読むと矢印の先の説明にふさわしい言葉になります。","赤色の矢印は「かざん」、黄色の矢印は「きつね」を表します。"], moveDirection: "right", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 8(もるてん).png",  answerHash: "a7c7402954360fc6f2fe86d7527e47d280afed5c0ce1c9c7fb9f9965943d4da8",  hints: ["矢印の左に書かれている言葉をひらがなにしてみましょう。それと矢印上のさいころの目との関係を考えてみましょう。","一番上の行を見てみましょう。「じゅんじょう」の1文字目と4文字目を読むと「じじ」であり、矢印の上のさいころは1の目と3の目になっています。すごろくのように考えてみましょう。"], moveDirection: "right", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 9(スナパイ).png",  answerHash: "c48eb6a0bf20baf726a5cc11fb63838b6f15842f4389c20e91b75b5b97ceb408",  hints: ["4つのなぞなぞの答えを考えましょう。赤い四角に書かれているなぞなぞは「警察官」と「検査」をひらがなにし、青い四角に書かれているなぞなぞは「狼」を英語にしてみましょう。","「ハーブの一種」とは「バジル」です。緑のなぞなぞは水辺の生き物、紫のなぞなぞは7色のもの、赤のなぞなぞは上旬、青の矢印は2文字の動詞が答えになります。"], moveDirection: "down", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 10(秋風。).png",  answerHash: "98c859af6de1e1ca4043d6148ab578239decc3b5463920965fc451fc38a0a7d5", hints: ["それぞれの漢字や熟語の読み方を考えてみましょう。","しりとりは「花」からスタートしてたどってみましょう。"], moveDirection: "left", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答",  image: "GF2 11(中野あるま).png",  answerHash: "e99459703b997e987c8643e533ee802c3fd54bd24ad3e40bd991322176b7e3c6", hints: ["真ん中に書かれている黒い文字を2通りの書き方で表してみましょう。その上で矢印の法則を考えましょう。この法則は向きに関わらず同一です","左はローマ字で、右は英語で考えましょう。黒い文字とオレンジの文字をそれぞれローマ字にしたり、黒い文字と緑の文字を英語にしたりして矢印の法則を考えましょう。"], moveDirection: "left", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答(わからないことがあれば検索することを推奨いたします。)",  image: "GF2 12(林檎さん).png",  answerHash: "2dde303424aec9ff19a58ed78d09c52a7c629a3398049cbef271ce00aaa9e76c", hints: ["左上にある5つの楽器をバンドの担当楽器を表す際に使われるアルファベット2または3文字で表してみましょう。左上の楽器のみアルファベット3文字になります。","左から、「ba」「key」「vo」「dr」「gt」と変換できます。楽器を囲む枠と変換したアルファベットに注目すると、枠の色と文字数が一致しています。左から当てはめていき、答えを求めましょう。答えは出てきた英単語の読み方をそのまま答えればOKです。"], moveDirection: "up", mascotEmoji: "🔮" },
+    { text: "ひらがなで解答", image: "GF2 LAST.png", answerHash: "efdbc1b8b7ae3cb178627cca94393a426cde8ddffd115b39c30697d4a109c6f1", hints: ["画像上部の道が書かれているものの枠に注目しましょう。どこかで見たことがありませんか？画面上部の数字が書かれている部分をクリックすると今までの問題画像を振り返ることができます。","枠の色は今まで解いてきた12問の謎の画像の枠の色と一致しています。黒い四角の位置を照らし合わせてどの文字が対応しているか特定し、順に読んでみましょう。\n(次のヒントには順に読んだ結果が書かれています。)","黒い四角の位置を順に読むと「答えの一文字目つなげ」となります。今までの答えも確認できるので最後の答えを導きましょう！"], moveDirection: "down", mascotEmoji: "🔮" }
   ];
 
-
   const solvedAnswers = {};
-  let current = 0; // 現在進行中の問題インデックス（グローバルで保持）
+  let current = 0;
 
-  // ---- 表紙の初期表示 ----
   function initCover(){
     document.title = EVENT_TITLE;
     document.getElementById('cover-title').textContent = EVENT_TITLE;
@@ -323,12 +295,10 @@
   }
   initCover();
 
-  // ---- 表紙画面へ移動する処理（ゲーム画面から呼び出し） ----
   function goToCover(){
     document.getElementById('screen-game').classList.remove('active');
     document.getElementById('screen-cover').classList.add('active');
     
-    // 途中経過があればボタンのテキストを「つづきから」に変更
     const startBtn = document.getElementById('start-btn');
     if (current > 0 && current < QUESTIONS.length) {
       startBtn.textContent = 'つづきから';
@@ -337,20 +307,16 @@
     }
   }
 
-  // ---- スタートボタン動作 ----
   function startGame(){
     document.getElementById('screen-cover').classList.remove('active');
     document.getElementById('screen-game').classList.add('active');
-    // current の値をリセットせずそのまま渡すことで、途中から再開可能
     renderQuestion(current);
   }
 
-  // ---- 回答の表記ゆれ吸収 ----
   function normalize(str){
     return str.normalize('NFKC').replace(/\s+/g,'').toLowerCase();
   }
 
-  // ---- SHA-256 ハッシュ生成関数 ----
   async function digestMessage(message) {
     const msgUint8 = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -358,7 +324,6 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // ---- 問題描画 ----
   function renderQuestion(i){
     const q = QUESTIONS[i];
     const isLast = (i === QUESTIONS.length - 1);
@@ -371,7 +336,7 @@
     document.getElementById('feedback').className = 'feedback';
     document.getElementById('answer-input').focus();
 
-    setMascotStatic(i); // 窓の中身を、アニメーションなしでこの問題の画像に固定する
+    setMascotStatic(i);
 
     hintsShown = 0;
     document.getElementById('hint-list').innerHTML = '';
@@ -381,7 +346,6 @@
     renderNav();
   }
 
-  // ---- 謎の画像:1枚分のスライド要素(画像 or 絵文字)を作る ----
   function buildMascotSlide(q){
     const slide = document.createElement('div');
     slide.className = 'mascot-slide';
@@ -389,6 +353,7 @@
       const img = document.createElement('img');
       img.src = q.image;
       img.alt = '謎の画像';
+      img.onclick = () => openZoomImage(q.image);
       slide.appendChild(img);
     } else {
       slide.textContent = q.mascotEmoji;
@@ -396,7 +361,6 @@
     return slide;
   }
 
-  // ---- 謎の画像:窓の中身を、動きのない状態でi問目の内容にリセットする ----
   function setMascotStatic(i){
     const container = document.getElementById('mascot');
     container.innerHTML = '';
@@ -406,20 +370,15 @@
     container.appendChild(slide);
   }
 
-  // ---- 謎の画像:正解時に、今の画像をnextIndexの画像と「くっついたまま」directionの方向へスライドさせる ----
-  // 例: direction が "right" なら、今の画像は右へ抜けていき、
-  //     次の画像はその左側にくっついた状態で、同じ速さで右へスライドしてきて画面に収まる
-  // nextIndex が null の場合(=LASTの問題に正解して次がない場合)は、今の画像だけが抜けていく
   function slideMascotTo(direction, nextIndex){
     const container = document.getElementById('mascot');
     const currentSlide = container.querySelector('.mascot-slide');
 
-    // 方向ごとに「次の画像の開始位置」を決める(今の画像とちょうど隣り合う位置)
     let startX = 0, startY = 0, moveX = 0, moveY = 0;
-    if(direction === 'right'){ startX = -100; moveX = 100; }      // 次は左隣から、右へ
-    else if(direction === 'left'){ startX = 100; moveX = -100; }  // 次は右隣から、左へ
-    else if(direction === 'up'){ startY = 100; moveY = -100; }    // 次は下隣から、上へ
-    else if(direction === 'down'){ startY = -100; moveY = 100; }  // 次は上隣から、下へ
+    if(direction === 'right'){ startX = -100; moveX = 100; }
+    else if(direction === 'left'){ startX = 100; moveX = -100; }
+    else if(direction === 'up'){ startY = 100; moveY = -100; }
+    else if(direction === 'down'){ startY = -100; moveY = 100; }
 
     if(nextIndex !== null){
       const nextSlide = buildMascotSlide(QUESTIONS[nextIndex]);
@@ -427,20 +386,18 @@
       nextSlide.style.transform = `translate(${startX}%, ${startY}%)`;
       container.appendChild(nextSlide);
 
-      // ここで一度描画を確定させてから transition を効かせないと、アニメーションが発生しないため
       void nextSlide.offsetWidth;
 
       nextSlide.style.transition = 'transform 0.9s ease';
-      nextSlide.style.transform = 'translate(0,0)'; // 次の画像は窓の中央へ
+      nextSlide.style.transform = 'translate(0,0)';
     }
 
     currentSlide.style.transition = 'transform 0.9s ease';
-    currentSlide.style.transform = `translate(${moveX}%, ${moveY}%)`; // 今の画像は窓の外へ
+    currentSlide.style.transform = `translate(${moveX}%, ${moveY}%)`;
   }
 
   let hintsShown = 0;
 
-  // ---- ヒント表示 ----
   function showNextHint(){
     const q = QUESTIONS[current];
     if(hintsShown >= q.hints.length) return;
@@ -458,7 +415,6 @@
     }
   }
 
-  // ---- 問題番号ナビゲーション ----
   function renderNav(){
     const nav = document.getElementById('q-nav');
     nav.innerHTML = '';
@@ -482,13 +438,11 @@
     });
   }
 
-  // ---- 問題見返すモーダル ----
   function openQuestionView(i){
     const q = QUESTIONS[i];
     const isLast = (i === QUESTIONS.length - 1);
     document.getElementById('q-modal-number').textContent = isLast ? 'LAST' : `Q${i+1}`;
 
-    // 画像があれば表示し、なければ画像エリア自体を隠す
     const imageEl = document.getElementById('q-modal-image');
     if(q.image){
       imageEl.src = q.image;
@@ -513,7 +467,16 @@
     document.getElementById('q-modal-overlay').classList.remove('open');
   }
 
-  // ---- 回答送信・判定 ----
+  function openZoomImage(src){
+    if(!src) return;
+    document.getElementById('image-zoom-img').src = src;
+    document.getElementById('image-zoom-overlay').classList.add('open');
+  }
+
+  function closeZoomImage(){
+    document.getElementById('image-zoom-overlay').classList.remove('open');
+  }
+
   async function submitAnswer(){
     const q = QUESTIONS[current];
     const input = document.getElementById('answer-input');
@@ -521,7 +484,6 @@
     const normalizedInput = normalize(rawVal);
     const feedback = document.getElementById('feedback');
 
-    // ハッシュ化して正解判定
     const inputHash = await digestMessage(normalizedInput);
     const isCorrect = (inputHash === q.answerHash);
 
@@ -531,39 +493,37 @@
       return;
     }
 
-    // 正解テキストを保持
     solvedAnswers[current] = rawVal;
 
     feedback.textContent = 'せいかい!';
     feedback.className = 'feedback ok';
     input.disabled = true;
 
-    // ---- 謎の画像をスライドさせる ----
-    // 次の問題がまだあれば、その画像をこの問題の画像にくっつけて一緒にスライドさせる。
-    // これがLASTの問題(=次がない)なら、今の画像だけがスライドして抜けていく。
-    const nextIndex = (current + 1 < QUESTIONS.length) ? current + 1 : null;
-    slideMascotTo(q.moveDirection, nextIndex);
+    const nextIndex = current + 1;
+    const isNextLast = (nextIndex === QUESTIONS.length - 1);
+    const isCurrentLast = (current === QUESTIONS.length - 1);
 
-    current++;
-    if(current < QUESTIONS.length){
-      const isUpcomingLast = (current === QUESTIONS.length - 1);
-
-      if(isUpcomingLast){
+    if(isNextLast || isCurrentLast) {
+      setTimeout(() => {
+        const card = document.getElementById('question-card');
+        card.classList.add('fading-slow');
         setTimeout(() => {
-          const card = document.getElementById('question-card');
-          card.classList.add('fading-slow');
-          setTimeout(() => {
+          if (isCurrentLast) {
+            card.classList.remove('fading-slow');
+            showEnding();
+          } else {
+            current++;
             renderQuestion(current);
             requestAnimationFrame(() => {
               card.classList.remove('fading-slow');
             });
-          }, 1100);
-        }, 900);
-      } else {
-        setTimeout(() => { renderQuestion(current); }, 900);
-      }
+          }
+        }, 1100);
+      }, 500);
     } else {
-      setTimeout(() => { showEnding(); }, 900);
+      slideMascotTo(q.moveDirection, nextIndex);
+      current++;
+      setTimeout(() => { renderQuestion(current); }, 900);
     }
   }
 
@@ -571,22 +531,17 @@
     if(e.key === 'Enter') submitAnswer();
   });
 
-  // ---- エンディング表示 ----
   function showEnding(){
     document.getElementById('screen-game').classList.remove('active');
     document.getElementById('screen-ending').classList.add('active');
 
     document.getElementById('ending-title').textContent = ENDING_TITLE;
     document.getElementById('ending-message').textContent = ENDING_MESSAGE;
-
-    const tweetText = encodeURIComponent(TWEET_TEXT);
-    const pageUrl = encodeURIComponent(location.href);
-    document.getElementById('share-link').href = `https://twitter.com/intent/tweet?text=${tweetText}&url=${pageUrl}`;
+    document.getElementById('ending-credit').textContent = COVER_CREDIT;
 
     launchConfetti();
   }
 
-  // ---- 紙吹雪演出 ----
   function launchConfetti(){
     const colors = ['#FF6B6B','#FFC94D','#4EC5D4','#9B6BFF','#4ADE80'];
     for(let i = 0; i < 60; i++){
@@ -601,7 +556,6 @@
       setTimeout(() => piece.remove(), 4500);
     }
   }
-
 </script>
 </body>
 </html>
